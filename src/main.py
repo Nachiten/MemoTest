@@ -1,6 +1,136 @@
 import pygame
 
 
+def setupInicial(cantFilasInput, cantColumnasInput):
+    global numeros
+    global numerosMostrados
+    global estado
+    global posSeleccionada1
+    global posSeleccionada2
+    global puntos
+    global totalPuntos
+    global user_text
+    global cantFilas
+    global cantColumnas
+
+    resul = (cantFilasInput * cantColumnasInput / 2) % 2
+
+    print(resul)
+    if resul != 0:
+        print("Debe haber un numero par de casillas!!!")
+        estado = 'E'
+        return
+
+    cantFilas = cantFilasInput
+    cantColumnas = cantColumnasInput
+
+    # --- MATRICES ---
+    numeros = [[0 for _ in range(cantColumnas)] for _ in range(cantFilas)]
+    numerosMostrados = [[0 for _ in range(cantColumnas)] for _ in range(cantFilas)]
+
+    # --- ESTADO Y POS SELECCIONADAS ---
+    # Estado: N = Nada Seleccionado, S1 = Selecciono un num, S2 = Selecciono 2 nums
+    estado = "N"
+    posSeleccionada1 = (0, 0)
+    posSeleccionada2 = (0, 0)
+
+    # --- PUNTOS ---
+    puntos = 0
+    totalPuntos = (cantFilas * cantColumnas) / 2
+
+    user_text = ''
+
+    llenarMatrices()
+
+    # Actualizar display
+    pygame.display.update()
+
+
+posXBoton = 200
+posYBoton = 650
+anchoBoton = 100
+altoBoton = 35
+
+
+def crearBotonGuardar():
+    pygame.draw.rect(ventana, colorBoton, (posXBoton, posYBoton, anchoBoton, altoBoton))
+
+    font = pygame.font.Font('freesansbold.ttf', 18)
+    textoBoton = font.render('Guardar', True, colorTexto, colorBoton)
+    textRect = textoBoton.get_rect()
+    textRect.center = (posXBoton + anchoBoton / 2, posYBoton + altoBoton / 2)
+    ventana.blit(textoBoton, textRect)
+
+
+def crearTextoInsertar():
+    font = pygame.font.Font('freesansbold.ttf', 18)
+    textoBoton = font.render(textoAEscribir, True, colorTexto, colorFondo)
+    textRect = textoBoton.get_rect()
+    textRect.center = (posXBoton + anchoBoton / 2, posYBoton - 80)
+    ventana.blit(textoBoton, textRect)
+
+
+def clickearBotonGuardar(unaPos):
+    posX = unaPos[0]
+    posY = unaPos[1]
+
+    if posXBoton < posX < posXBoton + anchoBoton and posYBoton < posY < posYBoton + altoBoton:
+        print("Clickeaste boton guardar")
+        inputSeparado = user_text.split("x")
+        print(inputSeparado[0] + " | " + inputSeparado[1])
+        setupInicial(int(inputSeparado[0]), int(inputSeparado[1]))
+
+
+def crearInputBox():
+    base_font = pygame.font.Font(None, 32)
+
+    posX = 200
+    posY = posYBoton - 50
+
+    input_rect = pygame.Rect(posX, posY, 100, 32)
+    color = pygame.Color('lightskyblue3')
+
+    pygame.draw.rect(ventana, color, input_rect, 3)
+    text_surface = base_font.render(user_text, True, (255, 255, 255))
+    ventana.blit(text_surface, (input_rect.x + 5, input_rect.y + 5))
+    pygame.display.flip()
+
+
+def reaccionarAEstado():
+    global estado
+    global textoAEscribir
+    global user_text
+
+    if estado == 'S1':
+        dibujarNumeroEn(posSeleccionada1[0], posSeleccionada1[1])
+    elif estado == 'S2':
+        dibujarNumeroEn(posSeleccionada1[0], posSeleccionada1[1])
+        dibujarNumeroEn(posSeleccionada2[0], posSeleccionada2[1])
+        pygame.display.update()
+        pygame.time.delay(1 * 1000)
+        estado = 'N'
+    elif estado == 'E':
+        textoAEscribir = '           La cantidad de casillas totales debe ser par!!           '
+        crearTextoInsertar()
+        user_text = ''
+        pygame.display.update()
+        pygame.time.delay(3 * 1000)
+        estado = 'N'
+        textoAEscribir = 'Insertar el tamaño de la forma filasxcolumnas. Ej: 3x4'
+
+
+def llenarMatrices():
+    contador = 1
+
+    for unaFila in range(0, cantFilas):
+        for unaColumna in range(0, cantColumnas):
+            numeros[unaFila][unaColumna] = contador
+            numerosMostrados[unaFila][unaColumna] = 1
+            contador += 1
+            if contador > cantFilas * cantColumnas / 2:
+                contador = 1
+
+
 def actualizarContadorPuntos():
     # create a font object.
     # 1st parameter is the font file
@@ -11,7 +141,7 @@ def actualizarContadorPuntos():
     # create a text suface object,
     # on which text is drawn on it.
     textoPuntos = font.render('Cantidad Puntos: ' + str(int(puntos)) + '/' + str(int(totalPuntos)), True,
-                              (255, 255, 255), (0, 0, 0))
+                              colorTexto, colorFondo)
 
     # create a rectangular object for the
     # text surface object
@@ -28,7 +158,7 @@ def actualizarContadorPuntos():
     if puntos == totalPuntos:
         font = pygame.font.Font('freesansbold.ttf', 40)
 
-        textoReiniciar = font.render('HAS GANADO!!!', True, (255, 255, 255), (0, 0, 0))
+        textoReiniciar = font.render('HAS GANADO!!!', True, colorTexto, colorFondo)
 
         textRect2 = textoReiniciar.get_rect()
         textRect2.center = (anchoVentana - 250 + 53, 57)
@@ -74,12 +204,9 @@ def dibujarNumeroEn(numFila, numCol):
     # 2nd parameter is size of the font
     font = pygame.font.Font('freesansbold.ttf', 42)
 
-    colorTexto = (255, 255, 255)
-    colorFondo = colorCelda
-
     # create a text suface object,
     # on which text is drawn on it.
-    textoPuntos = font.render(str(numeros[numFila][numCol]), True, colorTexto, colorFondo)
+    textoPuntos = font.render(str(numeros[numFila][numCol]), True, colorTexto, colorCelda)
 
     # create a rectangular object for the
     # text surface object
@@ -115,7 +242,7 @@ def mostrarMatriz():
             if numerosMostrados[numFila][numCol] == 1:
                 dibujarRectangulo(colorCelda, numCol, numFila)
             else:
-                dibujarRectangulo((0, 0, 0), numCol, numFila)
+                dibujarRectangulo(colorFondo, numCol, numFila)
 
 
 pygame.init()
@@ -123,6 +250,7 @@ pygame.init()
 # Comienza ejecucion
 
 # Variables Importantes [Globales]
+# --- BLOQUES ---
 # Posicion Bloques
 x = 20
 y = 20
@@ -132,70 +260,59 @@ alto = 50
 # Espacio entre bloques
 espacioX = 7
 espacioY = 7
+
 # Matriz
-cantFilas = 4  # Default 60 # fixear problema con rectangulos
-cantColumnas = 4
+cantFilas = 6
+cantColumnas = 6
 
-if cantFilas * cantColumnas / 2 % 2 != 0:
-    print("Debe haber un numero par de casillas!!!")
-    exit(-69)
-
-# Configuracion
-anchoVentana = 700  # Default 900x900
+# --- VENTANA ---
+anchoVentana = 700
 altoVentana = 700
+
+# --- OTROS ---
 segundosDelay = 1
 run = True
-estaEnPausa = True
+
+# --- COLORES ---
 colorCelda = (50, 50, 50)
+colorTexto = (255, 255, 255)
+colorFondo = (0, 0, 0)
+colorBoton = (1, 111, 106)
 
-pygame.display.set_caption("MemoTest")
+# --- MATRICES ---
+numeros = []
+numerosMostrados = []
 
-matriz = [[0 for vx in range(cantFilas)] for vy in range(cantColumnas)]
-
-'''
-numeros = [[1, 2, 3, 4, 5, 6],
-           [7, 8, 9, 10, 11, 12],
-           [13, 14, 15, 16, 17, 18],
-           [1, 2, 3, 4, 5, 6],
-           [7, 8, 9, 10, 11, 12],
-           [13, 14, 15, 16, 17, 18]]
-
-numerosMostrados = [[1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1]]
-'''
-
-numeros = [[1, 2, 3, 4],
-           [5, 6, 7, 8],
-           [1, 2, 3, 4],
-           [5, 6, 7, 8]]
-
-numerosMostrados = [[1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1],
-                    [1, 1, 1, 1, 1, 1]]
-
-# Estado: N = Nada Seleccionado, S = Selecciono algo
-estado = "N"
+# --- ESTADO Y POS SELECCIONADAS ---
+# Estado: N = Nada Seleccionado, S1 = Selecciono un num, S2 = Selecciono 2 nums
+estado = "NULL"
 posSeleccionada1 = (0, 0)
 posSeleccionada2 = (0, 0)
+
+# --- PUNTOS ---
 puntos = 0
-totalPuntos = (cantFilas * cantColumnas) / 2
+totalPuntos = 0
 
-# Setup Inicial
+user_text = ''
+
+# Setup de ventana
 ventana = pygame.display.set_mode((anchoVentana, altoVentana))
+ventana.fill(colorFondo)
+pygame.display.set_caption("MemoTest")
 
-pygame.display.update()
+textoAEscribir = 'Insertar el tamaño de la forma filasxcolumnas. Ej: 3x4'
 
-# leerArchivo()
+setupInicial(cantFilas, cantColumnas)
 
 # Bucle infinito
 while run:
+
+    ventana.fill(colorFondo)
+
+    crearInputBox()
+    crearBotonGuardar()
+    crearTextoInsertar()
+
     mostrarMatriz()
 
     for evento in pygame.event.get():
@@ -203,18 +320,17 @@ while run:
             run = False
         if evento.type == pygame.MOUSEBUTTONDOWN:
             tocarCelda(pygame.mouse.get_pos())
+            clickearBotonGuardar(pygame.mouse.get_pos())
             continue
-
-    if estado == 'S1':
-        dibujarNumeroEn(posSeleccionada1[0], posSeleccionada1[1])
-    elif estado == 'S2':
-        dibujarNumeroEn(posSeleccionada1[0], posSeleccionada1[1])
-        dibujarNumeroEn(posSeleccionada2[0], posSeleccionada2[1])
-        pygame.display.update()
-        pygame.time.delay(1 * 1000)
-        estado = 'N'
+        if evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_BACKSPACE:
+                user_text = user_text[:-1]
+            else:
+                user_text += evento.unicode
 
     actualizarContadorPuntos()
+
+    reaccionarAEstado()
 
     # Actualizar display
     pygame.display.update()
