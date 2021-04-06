@@ -114,14 +114,27 @@ def crearTextoInsertar():
 
 
 def clickearBotonGuardar(unaPos):
+    global estado
+    global textoAEscribir
+
     posX = unaPos[0]
     posY = unaPos[1]
 
     if posXBoton < posX < posXBoton + anchoBoton and posYBoton < posY < posYBoton + altoBoton:
         print("Clickeaste boton guardar")
         inputSeparado = user_text.split("x")
-        print(inputSeparado[0] + " | " + inputSeparado[1])
-        setupInicial(int(inputSeparado[0]), int(inputSeparado[1]))
+
+        try:
+            cantFilasInput = int(inputSeparado[0])
+            cantColumnasInput = int(inputSeparado[1])
+
+            print(cantFilasInput)
+            print(cantColumnasInput)
+
+            setupInicial(cantFilasInput, cantColumnasInput)
+        except:
+            textoAEscribir = '                      Hubo un error en la sintaxis!!                      '
+            estado = 'E'
 
 
 def crearInputBox():
