@@ -1,9 +1,41 @@
 import pygame
+import random
+
+
+def printearMatriz(unaMatriz):
+    for unaFila in range(0, cantFilas):
+        for unaColumna in range(0, cantColumnas):
+            print(str(unaMatriz[unaFila][unaColumna]), end=', ')
+            if unaMatriz[unaFila][unaColumna] < 10:
+                print(' ', end='')
+        print("")
+
+
+def generarMatrizRandom():
+    # Recorro la matriz numeros
+    for unaFila in range(0, cantFilas):
+        for unaColumna in range(0, cantColumnas):
+            numeroCorrecto = False
+
+            while not numeroCorrecto:
+                filaRandom = random.randrange(0, cantFilas)
+                columnaRandom = random.randrange(0, cantColumnas)
+
+                if numerosAntesDeRandom[filaRandom][columnaRandom] != -1:
+                    numeroCorrecto = True
+                    numeros[unaFila][unaColumna] = numerosAntesDeRandom[filaRandom][columnaRandom]
+                    numerosAntesDeRandom[filaRandom][columnaRandom] = -1
+
+    # --- PASOS ---
+    # 1 - Seleccionar numero random de matriz numerosAntesRandom
+    # 2 - Si no fue seleccionado, tomarlo (si fue seleciconado, repetir desde paso 1)
+    # 3 - Marcarlo como seleccionado
 
 
 def setupInicial(cantFilasInput, cantColumnasInput):
     global numeros
     global numerosMostrados
+    global numerosAntesDeRandom
     global estado
     global posSeleccionada1
     global posSeleccionada2
@@ -12,12 +44,14 @@ def setupInicial(cantFilasInput, cantColumnasInput):
     global user_text
     global cantFilas
     global cantColumnas
+    global textoAEscribir
 
     resul = (cantFilasInput * cantColumnasInput / 2) % 2
 
     print(resul)
     if resul != 0:
         print("Debe haber un numero par de casillas!!!")
+        textoAEscribir = '           La cantidad de casillas totales debe ser par!!           '
         estado = 'E'
         return
 
@@ -26,7 +60,18 @@ def setupInicial(cantFilasInput, cantColumnasInput):
 
     # --- MATRICES ---
     numeros = [[0 for _ in range(cantColumnas)] for _ in range(cantFilas)]
+    numerosAntesDeRandom = [[0 for _ in range(cantColumnas)] for _ in range(cantFilas)]
     numerosMostrados = [[0 for _ in range(cantColumnas)] for _ in range(cantFilas)]
+
+    llenarMatrices()
+
+    print("Numeros antes de random: ")
+    printearMatriz(numerosAntesDeRandom)
+
+    generarMatrizRandom()
+
+    print("Numeros: ")
+    printearMatriz(numeros)
 
     # --- ESTADO Y POS SELECCIONADAS ---
     # Estado: N = Nada Seleccionado, S1 = Selecciono un num, S2 = Selecciono 2 nums
@@ -39,8 +84,6 @@ def setupInicial(cantFilasInput, cantColumnasInput):
     totalPuntos = (cantFilas * cantColumnas) / 2
 
     user_text = ''
-
-    llenarMatrices()
 
     # Actualizar display
     pygame.display.update()
@@ -110,7 +153,6 @@ def reaccionarAEstado():
         pygame.time.delay(1 * 1000)
         estado = 'N'
     elif estado == 'E':
-        textoAEscribir = '           La cantidad de casillas totales debe ser par!!           '
         crearTextoInsertar()
         user_text = ''
         pygame.display.update()
@@ -124,7 +166,7 @@ def llenarMatrices():
 
     for unaFila in range(0, cantFilas):
         for unaColumna in range(0, cantColumnas):
-            numeros[unaFila][unaColumna] = contador
+            numerosAntesDeRandom[unaFila][unaColumna] = contador
             numerosMostrados[unaFila][unaColumna] = 1
             contador += 1
             if contador > cantFilas * cantColumnas / 2:
@@ -282,6 +324,7 @@ colorBoton = (1, 111, 106)
 # --- MATRICES ---
 numeros = []
 numerosMostrados = []
+numerosAntesDeRandom = []
 
 # --- ESTADO Y POS SELECCIONADAS ---
 # Estado: N = Nada Seleccionado, S1 = Selecciono un num, S2 = Selecciono 2 nums
