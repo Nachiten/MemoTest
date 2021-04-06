@@ -21,3 +21,6 @@ Un clasico juego de memoria. Hecho en 2 horas.
 *Version 4.0* : 
 - Se establece limite maximo para matriz de 10x10.
 - Se muestra la cantidad de errores.
+
+*Version 4.1* : 
+- Se fixea bug de contador de errores no reiniciado al reiniciar el juego.

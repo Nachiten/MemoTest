@@ -45,6 +45,7 @@ def setupInicial(cantFilasInput, cantColumnasInput):
     global cantFilas
     global cantColumnas
     global textoAEscribir
+    global errores
 
     resul = (cantFilasInput * cantColumnasInput / 2) % 2
 
@@ -81,6 +82,7 @@ def setupInicial(cantFilasInput, cantColumnasInput):
 
     # --- PUNTOS ---
     puntos = 0
+    errores = 0
     totalPuntos = (cantFilas * cantColumnas) / 2
 
     user_text = ''
