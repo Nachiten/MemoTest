@@ -107,6 +107,7 @@ def crearBotonGuardar():
 
 def crearTextoInsertar():
     font = pygame.font.Font('freesansbold.ttf', 18)
+
     textoBoton = font.render(textoAEscribir, True, colorTexto, colorFondo)
     textRect = textoBoton.get_rect()
     textRect.center = (posXBoton + anchoBoton / 2, posYBoton - 80)
@@ -128,11 +129,16 @@ def clickearBotonGuardar(unaPos):
             cantFilasInput = int(inputSeparado[0])
             cantColumnasInput = int(inputSeparado[1])
 
+            if cantFilasInput > 10 or cantColumnasInput > 10:
+                textoAEscribir = '                      El tamaño maximo soportado es 10x10!!                      '
+                estado = 'E'
+                return
+
             print(cantFilasInput)
             print(cantColumnasInput)
 
             setupInicial(cantFilasInput, cantColumnasInput)
-        except:
+        except ValueError:
             textoAEscribir = '                      Hubo un error en la sintaxis!!                      '
             estado = 'E'
 
@@ -195,20 +201,25 @@ def actualizarContadorPuntos():
 
     # create a text suface object,
     # on which text is drawn on it.
-    textoPuntos = font.render('Cantidad Puntos: ' + str(int(puntos)) + '/' + str(int(totalPuntos)), True,
+    textoPuntos = font.render('Puntos: ' + str(int(puntos)) + '/' + str(int(totalPuntos)), True,
                               colorTexto, colorFondo)
+    textoErrores = font.render('Errores: ' + str(int(errores)), True,
+                               colorTexto, colorFondo)
 
     # create a rectangular object for the
     # text surface object
     textRect = textoPuntos.get_rect()
+    textoErroresRect = textoErrores.get_rect()
 
     # set the center of the rectangular object.
-    textRect.center = (500, 20)
+    textRect.topleft = (anchoVentana - 180, 20)
+    textoErroresRect.topleft = (anchoVentana - 180, 45)
 
     # copying the text surface object
     # to the display surface object
     # at the center coordinate.
     ventana.blit(textoPuntos, textRect)
+    ventana.blit(textoErrores, textoErroresRect)
 
     if puntos == totalPuntos:
         font = pygame.font.Font('freesansbold.ttf', 40)
@@ -225,16 +236,17 @@ def tocarCelda(unaPos):
     global posSeleccionada1
     global posSeleccionada2
     global puntos
+    global errores
 
     posX = unaPos[0]
     posY = unaPos[1]
 
     for numFila in range(0, cantFilas):
         for numCol in range(0, cantColumnas):
-            posXEsperada = x + numCol * (ancho + espacioX)
-            posYEsperada = y + numFila * (alto + espacioY)
-            if posXEsperada < posX < posXEsperada + ancho and \
-                    posYEsperada < posY < posYEsperada + alto and \
+            posXEsperada = xBloques + numCol * (anchoBloques + espacioX)
+            posYEsperada = yBloques + numFila * (altoBloques + espacioY)
+            if posXEsperada < posX < posXEsperada + anchoBloques and \
+                    posYEsperada < posY < posYEsperada + altoBloques and \
                     numerosMostrados[numFila][numCol] == 1:
                 print("Tocaste un cuadrado: Fila: " + str(numFila) + " Columna:" + str(numCol))
                 if estado == 'N':
@@ -248,6 +260,8 @@ def tocarCelda(unaPos):
                         puntos += 1
                         numerosMostrados[numFila][numCol] = 0
                         numerosMostrados[posSeleccionada1[0]][posSeleccionada1[1]] = 0
+                    else:
+                        errores += 1
                     estado = 'S2'
                     posSeleccionada2 = (numFila, numCol)
 
@@ -268,7 +282,8 @@ def dibujarNumeroEn(numFila, numCol):
     textRect = textoPuntos.get_rect()
 
     # set the center of the rectangular object.
-    textRect.center = (x + numCol * (ancho + espacioX) + ancho / 2, y + numFila * (alto + espacioY) + alto / 2)
+    textRect.center = (xBloques + numCol * (anchoBloques + espacioX) + anchoBloques / 2,
+                       yBloques + numFila * (altoBloques + espacioY) + altoBloques / 2)
 
     # copying the text surface object
     # to the display surface object
@@ -284,10 +299,10 @@ def dibujarNumeros():
 
 
 def dibujarRectangulo(colores, columna, fila):
-    pygame.draw.rect(ventana,
-                     colores,  # Color
-                     (x + columna * (ancho + espacioX), y + fila * (alto + espacioY), ancho,
-                      alto))  # posx, posy, ancho, alto
+    pygame.draw.rect(ventana, colores,
+                     (xBloques + columna * (anchoBloques + espacioX),
+                      yBloques + fila * (altoBloques + espacioY),
+                      anchoBloques, altoBloques))  # posx, posy, ancho, alto
 
 
 def mostrarMatriz():
@@ -307,11 +322,11 @@ pygame.init()
 # Variables Importantes [Globales]
 # --- BLOQUES ---
 # Posicion Bloques
-x = 20
-y = 20
+xBloques = 20
+yBloques = 20
 # Tamaño bloques
-ancho = 50
-alto = 50
+anchoBloques = 50
+altoBloques = 50
 # Espacio entre bloques
 espacioX = 7
 espacioY = 7
@@ -348,6 +363,7 @@ posSeleccionada2 = (0, 0)
 # --- PUNTOS ---
 puntos = 0
 totalPuntos = 0
+errores = 0
 
 user_text = ''
 
