@@ -24,3 +24,7 @@ Un clasico juego de memoria. Hecho en 2 horas.
 
 *Version 4.1* : 
 - Se fixea bug de contador de errores no reiniciado al reiniciar el juego.
+
+*Version 5.0* : 
+- Gran refactor de todo el codigo.
+- Optimizaciones varias.
